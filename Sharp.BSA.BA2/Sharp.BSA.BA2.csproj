@@ -5,9 +5,17 @@
     <RootNamespace>SharpBSABA2</RootNamespace>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageId>P1X.Sharp.BSA.BA2</PackageId>
+    
+    <Authors>p1x</Authors>
+    <PackageProjectUrl>https://github.com/p1x/BSA_Browser</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/p1x/BSA_Browser/blob/master/LICENSE</PackageLicenseUrl>
+    <RepositoryUrl>https://github.com/p1x/BSA_Browser.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>ba2 bsa</PackageTags>
+    <Version>1.17.0</Version>
+    <Description>Library for BSA and BA2 archives.</Description>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="IonKiwi.lz4.managed" Version="1.0.7" />
