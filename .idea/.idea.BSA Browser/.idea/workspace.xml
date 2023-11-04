@@ -106,7 +106,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1699064480949</updated>
-      <workItem from="1699064482093" duration="3420000" />
+      <workItem from="1699064482093" duration="4115000" />
     </task>
     <task id="LOCAL-00001" summary="Fix SharpZipLib package reference&#10;Add jetbrains files">
       <option name="closed" value="true" />
@@ -132,7 +132,15 @@
       <option name="project" value="LOCAL" />
       <updated>1699066103547</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Add nuget package properties">
+      <option name="closed" value="true" />
+      <created>1699068036289</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1699068036289</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -154,6 +162,7 @@
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
     <MESSAGE value="Fix SharpZipLib package reference&#10;Add jetbrains files" />
     <MESSAGE value="Migrate Sharp.BSA.BA2.csproj to netstandard2.0" />
-    <option name="LAST_COMMIT_MESSAGE" value="Migrate Sharp.BSA.BA2.csproj to netstandard2.0" />
+    <MESSAGE value="Add nuget package properties" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add nuget package properties" />
   </component>
 </project>

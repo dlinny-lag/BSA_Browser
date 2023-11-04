@@ -6,7 +6,7 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageId>P1X.Sharp.BSA.BA2</PackageId>
+    <PackageId>Sharp.BSA.BA2</PackageId>
     
     <Authors>p1x</Authors>
     <PackageProjectUrl>https://github.com/p1x/BSA_Browser</PackageProjectUrl>
@@ -16,9 +16,16 @@
     <PackageTags>ba2 bsa</PackageTags>
     <Version>1.17.0</Version>
     <Description>Library for BSA and BA2 archives.</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="IonKiwi.lz4.managed" Version="1.0.7" />
     <PackageReference Include="SharpZipLib" Version="1.3.3" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 </Project>
