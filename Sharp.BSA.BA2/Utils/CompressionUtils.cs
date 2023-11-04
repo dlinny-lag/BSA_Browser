@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using lz4;
+using IonKiwi.lz4;
 using SharpBSABA2.Extensions;
 
 namespace SharpBSABA2.Utils

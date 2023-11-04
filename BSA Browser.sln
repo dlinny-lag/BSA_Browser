@@ -1,11 +1,11 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.31911.260
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BSA Browser", "BSA Browser\BSA Browser.csproj", "{63F0485C-8F38-4636-B255-3328E660664D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sharp.BSA.BA2", "Sharp.BSA.BA2\Sharp.BSA.BA2.csproj", "{CA4A7785-F222-4CAA-84EF-6BFDD584DC83}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sharp.BSA.BA2", "Sharp.BSA.BA2\Sharp.BSA.BA2.csproj", "{CA4A7785-F222-4CAA-84EF-6BFDD584DC83}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A7F83BD8-772D-469B-8816-B8D9FB0378EC}"
 	ProjectSection(SolutionItems) = preProject
