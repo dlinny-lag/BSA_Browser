@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using IonKiwi.lz4;
+using K4os.Compression.LZ4;
+using K4os.Compression.LZ4.Streams;
 using SharpBSABA2.Extensions;
 
 namespace SharpBSABA2.Utils
@@ -74,7 +75,7 @@ namespace SharpBSABA2.Utils
             input.Read(data, 0, data.Length);
 
             using (var ms = new MemoryStream(data, false))
-            using (var lz4Stream = LZ4Stream.CreateDecompressor(ms, LZ4StreamMode.Read))
+            using (var lz4Stream = LZ4Stream.Decode(ms))
             {
                 var sw = Stopwatch.StartNew();
 
@@ -94,6 +95,36 @@ namespace SharpBSABA2.Utils
             }
 
             progressReport?.Invoke(written);
+        }
+        
+        /// <summary>
+        /// Decompresses <paramref name="input"/> to <paramref name="output"/> with progress reports.
+        /// </summary>
+        /// <param name="input">The <see cref="Stream"/> with the data to decompress.</param>
+        /// <param name="length">The length of the data in the <paramref name="input"/>.</param>
+        /// <param name="output">The <see cref="Stream"/> to decompress to.</param>
+        /// <param name="outputLength">The length of the data to be written to <paramref name="output"/> after decompression.</param>
+        /// <param name="progressReport">Invokes at interval, based on <paramref name="progressInterval"/>, the amount of bytes written.</param>
+        public static void DecompressLZ4(Stream input,
+                                         uint length,
+                                         Stream output,
+                                         uint outputLength,
+                                         Action<ulong> progressReport)
+        {
+            int count;
+            int written = 0;
+            var buffer = new byte[outputLength];
+
+            var data = new byte[length];
+            input.Read(data, 0, data.Length);
+
+
+            written = LZ4Codec.PartialDecode(data, buffer);
+            Debug.Assert(written == outputLength);
+
+            output.Write(buffer, 0, buffer.Length);
+            
+            progressReport?.Invoke((ulong) written);
         }
     }
 }

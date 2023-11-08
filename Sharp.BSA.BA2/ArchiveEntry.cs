@@ -106,10 +106,13 @@ namespace SharpBSABA2
             if (!string.IsNullOrEmpty(destination))
                 path = Path.Combine(destination, path);
 
+            path = Path.GetFullPath(path);
+            path = @"\\?\" + path;
+            
             if (!Directory.Exists(Path.GetDirectoryName(path)))
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
 
-            using (var fs = File.Create(path))
+            using (var fs = File.Open(path, FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
                 this.WriteDataToStream(fs, extractParams);
 
             if (this.Archive.MatchLastWriteTime)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 /* 
@@ -23,7 +24,12 @@ namespace SharpBSABA2.BA2Util
         public const int DDS_FOURCC = 0x00000004; // DDPF_FOURCC
         public const int DDS_RGB = 0x00000040; // DDPF_RGB
         public const int DDS_RGBA = 0x00000041; // DDPF_RGB | DDPF_ALPHAPIXELS
-
+        public const int DDS_LUMINANCE = 0x00020000;// DDPF_LUMINANCE
+        public const int DDS_LUMINANCEA = 0x00020001;// DDPF_LUMINANCE | DDPF_ALPHAPIXELS
+        public const int DDS_ALPHA = 0x00000002;// DDPF_ALPHA
+        public const int DDS_PAL8 = 0x00000020;// DDPF_PALETTEINDEXED8
+        public const int DDS_BUMPDUDV = 0x00080000;  // DDPF_BUMPDUDV
+        
         public const int DDS_HEADER_FLAGS_TEXTURE = 0x00001007; // DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH | DDSD_PIXELFORMAT
         public const int DDS_HEADER_FLAGS_MIPMAP = 0x00020000; // DDSD_MIPMAPCOUNT
         public const int DDS_HEADER_FLAGS_LINEARSIZE = 0x00080000; // DDSD_LINEARSIZE
@@ -43,23 +49,45 @@ namespace SharpBSABA2.BA2Util
     /// </summary>
     public enum DXGI_FORMAT
     {
+        R16G16B16A16_FLOAT = 10,
+        R16G16B16A16_UNORM = 11,
+        R8G8B8A8_TYPELESS = 27,
         R8G8B8A8_UNORM = 28,
         R8G8B8A8_UNORM_SRGB = 29,
+        R8G8B8A8_UINT = 30,
+        R8G8B8A8_SNORM = 31,
+        R8G8B8A8_SINT = 32,
+        R8_TYPELESS = 60,
         R8_UNORM = 61,
+        R8_UINT = 62,
+        R8_SNORM = 63,
+        R8_SINT = 64,
+        BC1_TYPELESS = 70,
         BC1_UNORM = 71,
         BC1_UNORM_SRGB = 72,
+        BC2_TYPELESS = 73,
         BC2_UNORM = 74,
+        BC2_UNORM_SRGB = 75,
+        BC3_TYPELESS = 76,
         BC3_UNORM = 77,
         BC3_UNORM_SRGB = 78,
+        BC4_TYPELESS = 79,
         BC4_UNORM = 80,
+        BC4_SNORM = 81,
+        BC5_TYPELESS = 82,
         BC5_UNORM = 83,
         BC5_SNORM = 84,
         B5G6R5_UNORM = 85,
         B8G8R8A8_UNORM = 87,
         B8G8R8X8_UNORM = 88,
+        B8G8R8A8_TYPELESS = 90,
+        B8G8R8A8_UNORM_SRGB = 91,
+        BC6H_TYPELESS = 94,
         BC6H_UF16 = 95,
+        BC6H_SF16 = 96,
+        BC7_TYPELESS = 97,
         BC7_UNORM = 98,
-        BC7_UNORM_SRGB = 99
+        BC7_UNORM_SRGB = 99,
     }
 
     /// <summary>
@@ -239,27 +267,27 @@ namespace SharpBSABA2.BA2Util
 
         public void Write(System.IO.BinaryWriter bw)
         {
-            bw.Write(dwSize);
-            bw.Write(dwHeaderFlags);
-            bw.Write(dwHeight);
-            bw.Write(dwWidth);
-            bw.Write(dwPitchOrLinearSize);
-            bw.Write(dwDepth);
-            bw.Write(dwMipMapCount);
+            bw.Write(dwSize); // 1
+            bw.Write(dwHeaderFlags); // 2
+            bw.Write(dwHeight); // 3
+            bw.Write(dwWidth); // 4
+            bw.Write(dwPitchOrLinearSize); // 5
+            bw.Write(dwDepth); // 6
+            bw.Write(dwMipMapCount); // 7
 
             // Just write it multiple times, since it's never assigned a value anyway
             for (int i = 0; i < 11; i++)
-                bw.Write(dwReserved1);
+                bw.Write(dwReserved1); // 8 - 18
 
             // DDS_PIXELFORMAT
-            bw.Write(PixelFormat.dwSize);
-            bw.Write(PixelFormat.dwFlags);
-            bw.Write(PixelFormat.dwFourCC);
-            bw.Write(PixelFormat.dwRGBBitCount);
-            bw.Write(PixelFormat.dwRBitMask);
-            bw.Write(PixelFormat.dwGBitMask);
-            bw.Write(PixelFormat.dwBBitMask);
-            bw.Write(PixelFormat.dwABitMask);
+            bw.Write(PixelFormat.dwSize); // 19
+            bw.Write(PixelFormat.dwFlags); // 20
+            bw.Write(PixelFormat.dwFourCC); // 21
+            bw.Write(PixelFormat.dwRGBBitCount); // 22 
+            bw.Write(PixelFormat.dwRBitMask); // 23
+            bw.Write(PixelFormat.dwGBitMask); // 24
+            bw.Write(PixelFormat.dwBBitMask); // 25 
+            bw.Write(PixelFormat.dwABitMask); // 26
 
             bw.Write(dwSurfaceFlags);
             bw.Write(dwCubemapFlags);

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -229,7 +230,7 @@ namespace BSA_Browser_CLI
                 int line = -1;
                 int prevLength = 0;
                 int skipped = 0;
-                var files = archive.Files.Where(x => Filter(x.FullPath)).ToList();
+                var files = archive.Files;//.Where(x => Filter(x.FullPath)).ToList();
 
                 HandleUnsupportedTextures(files);
 
@@ -244,7 +245,7 @@ namespace BSA_Browser_CLI
 
                 foreach (var entry in files)
                 {
-                    string output = $"Extracting: {++count}/{files.Count} - {entry.FullPath}".PadRight(prevLength);
+                    var output = $"Extracting: {++count}/{files.Count} - {entry.FullPath}".PadRight(prevLength);
 
                     if (line > -1)
                     {

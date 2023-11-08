@@ -124,6 +124,8 @@ namespace BSA_Browser_CLI
                 {
                     if (i == args.Length - 1 && this.Extract) // Last item is destination when extracting
                     {
+                        if (!Directory.Exists(arg))
+                            Directory.CreateDirectory(arg);
                         if (Directory.Exists(arg))
                             this.Destination = arg;
                         else
