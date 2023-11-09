@@ -1,4 +1,4 @@
-## BSA Browser
+## BSA Browser and library
 
 ### Introduction
 BSA Browser is a Bethesda Archive browser & extractor application for Windows. Games that are supported includes the Fallout series and Elder Scrolls series (except Elder Scrolls Online).
@@ -8,6 +8,11 @@ BSA Browser started as a fork of [Fallout Mod Manager](https://sourceforge.net/p
 Read more at [BSA Browser](https://www.nexusmods.com/skyrimspecialedition/mods/1756) on Nexus Mods.
 
 Requires .NET Framework 4.8
+
+### Library
+Updated to .Net Standard 2.0 and published at Nuget.
+
+[![Nuget (with prereleases)](https://img.shields.io/nuget/vpre/Sharp.BSA.BA2)](https://www.nuget.org/packages/Sharp.BSA.BA2/absoluteLatest)
 
 ### Features
  - Browse & extract files from .BSA/.BA2/.DAT archives

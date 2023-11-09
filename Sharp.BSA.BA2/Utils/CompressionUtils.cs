@@ -111,7 +111,6 @@ namespace SharpBSABA2.Utils
                                          uint outputLength,
                                          Action<ulong> progressReport)
         {
-            int count;
             int written = 0;
             var buffer = new byte[outputLength];
 

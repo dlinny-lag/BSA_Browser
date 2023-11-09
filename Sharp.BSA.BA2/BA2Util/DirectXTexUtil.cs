@@ -22,6 +22,8 @@
 // ------------------------------------------------------------------------
 // Author: Philip/Scobalula
 // Description: DirectXTex DDS Header Utilities
+// Source: https://gist.github.com/Scobalula/d9474f3fcf3d5a2ca596fceb64e16c98
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
