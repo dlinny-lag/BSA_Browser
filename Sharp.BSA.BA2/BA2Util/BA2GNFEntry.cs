@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using DirectXTex;
 using SharpBSABA2.Utils;
 
 namespace SharpBSABA2.BA2Util
@@ -86,7 +87,7 @@ namespace SharpBSABA2.BA2Util
 
         public override string GetToolTipText()
         {
-            string dxgi = Enum.GetName(typeof(DXGI_FORMAT_FULL), format);
+            var dxgi = Enum.GetName(typeof(DirectXTexUtility.DXGIFormat), format);
 
             return $"Name hash:\t {nameHash:X}\n" +
                 $"Directory hash:\t {dirHash:X}\n" +

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
+using DirectXTex;
 using SharpBSABA2.Extensions;
 using SharpBSABA2.Utils;
 
@@ -93,7 +95,7 @@ namespace SharpBSABA2.BA2Util
 
         public override string GetToolTipText()
         {
-            string dxgi = Enum.GetName(typeof(DXGI_FORMAT_FULL), format);
+            string dxgi = Enum.GetName(typeof(DirectXTexUtility.DXGIFormat), format);
 
             return $"Name hash:\t {nameHash:X}\n" +
                 $"Directory hash:\t {dirHash:X}\n" +
@@ -109,267 +111,36 @@ namespace SharpBSABA2.BA2Util
 
         public bool IsFormatSupported()
         {
-            return Enum.IsDefined(typeof(DXGI_FORMAT), (int)format);
+            return Enum.IsDefined(typeof(DirectXTexUtility.DXGIFormat), (uint)format);
         }
 
+        private uint _headerSize = 0;
+        
         private uint GetHeaderSize()
         {
+            if (_headerSize > 0)
+                return _headerSize;
+            
             uint size = 0;
-
-            // DDS.DDS_MAGIC
-            size += 4;
-            size += DDS_HEADER.GetSize();
-
-            var dxgiFormat = (DXGI_FORMAT)format;
-            // If DXT10 add that size too
-            switch (dxgiFormat)
-            {
-                case DXGI_FORMAT.BC1_UNORM_SRGB:
-                case DXGI_FORMAT.BC3_UNORM_SRGB:
-                case DXGI_FORMAT.BC4_UNORM:
-                case DXGI_FORMAT.BC5_SNORM:
-                case DXGI_FORMAT.BC7_UNORM:
-                case DXGI_FORMAT.BC7_UNORM_SRGB:
-                case DXGI_FORMAT.R8G8B8A8_SNORM:
-                case DXGI_FORMAT.R8G8B8A8_UNORM_SRGB:
-                case DXGI_FORMAT.B8G8R8A8_UNORM_SRGB:
-                    size += DDS_HEADER_DXT10.GetSize();
-                    break;
-            }
-            return size;
+            
+            size += (uint) Marshal.SizeOf(DirectXTexUtility.DDSHeader.DDSMagic);
+            size += (uint) Marshal.SizeOf<DirectXTexUtility.DDSHeader>();
+            var metadata = DirectXTexUtility.GenerateMetadata(width, height, numMips, (DirectXTexUtility.DXGIFormat) format, isCubemap == 1);
+            var pixelFormat = DirectXTexUtility.GetPixelFormat(metadata);
+            var hasDx10Header = DirectXTexUtility.HasDx10Header(pixelFormat);
+            if (hasDx10Header)
+                size += (uint) Marshal.SizeOf<DirectXTexUtility.DX10Header>();
+            
+            return _headerSize = size;
         }
 
         private void WriteHeader(BinaryWriter bw)
         {
-            var ddsHeader = new DDS_HEADER();
+            var metadata = DirectXTexUtility.GenerateMetadata(width, height, numMips, (DirectXTexUtility.DXGIFormat) format, isCubemap == 1);
+            DirectXTexUtility.GenerateDDSHeader(metadata, DirectXTexUtility.DDSFlags.FORCEDX10EXTMISC2, out var header, out var header10);
+            var headerBytes = DirectXTexUtility.EncodeDDSHeader(header, header10);
 
-            ddsHeader.dwSize = DDS_HEADER.GetSize();
-            ddsHeader.dwHeaderFlags = DDS.DDS_HEADER_FLAGS_TEXTURE | DDS.DDS_HEADER_FLAGS_LINEARSIZE | DDS.DDS_HEADER_FLAGS_MIPMAP;
-            ddsHeader.dwHeight = height;
-            ddsHeader.dwWidth = width;
-            ddsHeader.dwMipMapCount = numMips;
-            ddsHeader.PixelFormat.dwSize = DDS_PIXELFORMAT.GetSize();
-            ddsHeader.dwSurfaceFlags = DDS.DDS_SURFACE_FLAGS_TEXTURE | DDS.DDS_SURFACE_FLAGS_MIPMAP;
-            ddsHeader.dwCubemapFlags = isCubemap == 1 ? (uint)(DDSCAPS2.CUBEMAP
-                | DDSCAPS2.CUBEMAP_NEGATIVEX | DDSCAPS2.CUBEMAP_POSITIVEX
-                | DDSCAPS2.CUBEMAP_NEGATIVEY | DDSCAPS2.CUBEMAP_POSITIVEY
-                | DDSCAPS2.CUBEMAP_NEGATIVEZ | DDSCAPS2.CUBEMAP_POSITIVEZ
-                | DDSCAPS2.CUBEMAP_ALLFACES) : 0u;
-
-            var dxgiFormat = (DXGI_FORMAT)format;
-            switch (dxgiFormat)
-            {
-                case DXGI_FORMAT.BC1_TYPELESS:
-                case DXGI_FORMAT.BC1_UNORM:
-                    ddsHeader.PixelFormat.dwFlags = DDS.DDS_FOURCC;
-                    ddsHeader.PixelFormat.dwFourCC = DDS.MAKEFOURCC('D', 'X', 'T', '1');
-                    ddsHeader.dwPitchOrLinearSize = (uint)(width * height / 2); // 4bpp
-                    break;
-
-                case DXGI_FORMAT.BC1_UNORM_SRGB:
-                    ddsHeader.PixelFormat.dwFlags = DDS.DDS_FOURCC;
-                    ddsHeader.PixelFormat.dwFourCC = DDS.MAKEFOURCC('D', 'X', '1', '0');
-                    ddsHeader.dwPitchOrLinearSize = (uint)(width * height / 2); // 4bpp
-                    break;
-
-                case DXGI_FORMAT.BC2_TYPELESS:
-                case DXGI_FORMAT.BC2_UNORM:
-                case DXGI_FORMAT.BC2_UNORM_SRGB:
-                    ddsHeader.PixelFormat.dwFlags = DDS.DDS_FOURCC;
-                    ddsHeader.PixelFormat.dwFourCC = DDS.MAKEFOURCC('D', 'X', 'T', '3');
-                    ddsHeader.dwPitchOrLinearSize = (uint)(width * height); // 8bpp
-                    break;
-                
-                case DXGI_FORMAT.BC3_TYPELESS:
-                case DXGI_FORMAT.BC3_UNORM:
-                    ddsHeader.PixelFormat.dwFlags = DDS.DDS_FOURCC;
-                    ddsHeader.PixelFormat.dwFourCC = DDS.MAKEFOURCC('D', 'X', 'T', '5');
-                    ddsHeader.dwPitchOrLinearSize = (uint)(width * height); // 8bpp
-                    break;
-                
-                case DXGI_FORMAT.BC4_TYPELESS:
-                case DXGI_FORMAT.BC4_UNORM:
-                case DXGI_FORMAT.BC4_SNORM:
-                    ddsHeader.PixelFormat.dwFlags = DDS.DDS_FOURCC;
-                    ddsHeader.PixelFormat.dwFourCC = DDS.MAKEFOURCC('D', 'X', '1', '0');
-                    ddsHeader.dwPitchOrLinearSize = (uint)(width * height / 2); // 4bpp
-                    break;
-                
-                case DXGI_FORMAT.BC5_TYPELESS:
-                case DXGI_FORMAT.BC5_UNORM:
-                case DXGI_FORMAT.BC5_SNORM:
-                    
-                case DXGI_FORMAT.BC3_UNORM_SRGB:
-                case DXGI_FORMAT.BC7_TYPELESS:
-                case DXGI_FORMAT.BC7_UNORM:
-                case DXGI_FORMAT.BC7_UNORM_SRGB:
-                    ddsHeader.PixelFormat.dwFlags = DDS.DDS_FOURCC;
-                    ddsHeader.PixelFormat.dwFourCC = DDS.MAKEFOURCC('D', 'X', '1', '0');
-                    ddsHeader.dwPitchOrLinearSize = (uint)(width * height); // 8bpp
-                    break;
-                
-                case DXGI_FORMAT.BC6H_TYPELESS:
-                    ddsHeader.PixelFormat.dwFlags = DDS.DDS_FOURCC;
-                    ddsHeader.PixelFormat.dwFourCC = DDS.MAKEFOURCC('B', 'C', '6', 'H');
-                    ddsHeader.dwPitchOrLinearSize = (uint)(width * height); // 8bpp
-                    break;
-                case DXGI_FORMAT.BC6H_UF16:
-                    ddsHeader.PixelFormat.dwFlags = DDS.DDS_FOURCC;
-                    ddsHeader.PixelFormat.dwFourCC = DDS.MAKEFOURCC('B', 'C', '6', 'H');
-                    ddsHeader.dwPitchOrLinearSize = (uint)(width * height); // 8bpp
-                    break;
-                case DXGI_FORMAT.BC6H_SF16:
-                    ddsHeader.PixelFormat.dwFlags = DDS.DDS_FOURCC;
-                    ddsHeader.PixelFormat.dwFourCC = DDS.MAKEFOURCC('B', 'C', '6', 'H');
-                    ddsHeader.dwPitchOrLinearSize = (uint)(width * height * 2); // 16bpp
-                    break;
-                    
-                case DXGI_FORMAT.B8G8R8A8_TYPELESS:
-                case DXGI_FORMAT.B8G8R8A8_UNORM:
-                case DXGI_FORMAT.B8G8R8A8_UNORM_SRGB:
-                case DXGI_FORMAT.B8G8R8X8_UNORM:
-                    ddsHeader.PixelFormat.dwFlags = DDS.DDS_RGBA;
-                    ddsHeader.PixelFormat.dwRGBBitCount = 32;
-                    ddsHeader.PixelFormat.dwRBitMask = 0x00FF0000;
-                    ddsHeader.PixelFormat.dwGBitMask = 0x0000FF00;
-                    ddsHeader.PixelFormat.dwBBitMask = 0x000000FF;
-                    ddsHeader.PixelFormat.dwABitMask = 0xFF000000;
-                    ddsHeader.dwPitchOrLinearSize = (uint)(width * height * 4); // 32bpp
-                    break;
-                
-                case DXGI_FORMAT.R8G8B8A8_TYPELESS:
-                case DXGI_FORMAT.R8G8B8A8_UINT:
-                case DXGI_FORMAT.R8G8B8A8_SINT:
-                    ddsHeader.PixelFormat.dwFlags = DDS.DDS_RGBA;
-                    ddsHeader.PixelFormat.dwRGBBitCount = 32;
-                    ddsHeader.PixelFormat.dwRBitMask = 0x000000FF;
-                    ddsHeader.PixelFormat.dwGBitMask = 0x0000FF00;
-                    ddsHeader.PixelFormat.dwBBitMask = 0x00FF0000;
-                    ddsHeader.PixelFormat.dwABitMask = 0xFF000000;
-                    ddsHeader.dwPitchOrLinearSize = (uint)(width * height * 4); // 32bpp
-                    break;
-
-                case DXGI_FORMAT.R8G8B8A8_UNORM:
-                case DXGI_FORMAT.R8G8B8A8_UNORM_SRGB:
-                    ddsHeader.PixelFormat.dwFlags = DDS.DDS_FOURCC;
-                    ddsHeader.PixelFormat.dwFourCC = DDS.MAKEFOURCC('D', 'X', '1', '0');
-                    ddsHeader.dwPitchOrLinearSize = (uint)(width * height * 4); // 32bpp
-                    break;
-
-                case DXGI_FORMAT.R8G8B8A8_SNORM:
-                    ddsHeader.PixelFormat.dwFlags = DDS.DDS_BUMPDUDV;
-                    ddsHeader.PixelFormat.dwRGBBitCount = 32;
-                    ddsHeader.PixelFormat.dwRBitMask = 0x000000FF;
-                    ddsHeader.PixelFormat.dwGBitMask = 0x0000FF00;
-                    ddsHeader.PixelFormat.dwBBitMask = 0x00FF0000;
-                    ddsHeader.PixelFormat.dwABitMask = 0xFF000000;
-                    ddsHeader.dwPitchOrLinearSize = (uint)(width * height * 4); // 32bpp
-                    break;
-                
-                case DXGI_FORMAT.B5G6R5_UNORM:
-                    ddsHeader.PixelFormat.dwFlags = DDS.DDS_RGB;
-                    ddsHeader.PixelFormat.dwRGBBitCount = 16;
-                    ddsHeader.PixelFormat.dwRBitMask = 0x0000f800;
-                    ddsHeader.PixelFormat.dwGBitMask = 0x000007e0;
-                    ddsHeader.PixelFormat.dwBBitMask = 0x0000001f;
-                    ddsHeader.dwPitchOrLinearSize = (uint)(width * height * 2); // 16bpp
-                    break;
-                
-                case DXGI_FORMAT.R8_TYPELESS:
-                case DXGI_FORMAT.R8_UNORM:
-                case DXGI_FORMAT.R8_UINT:
-                case DXGI_FORMAT.R8_SNORM:
-                case DXGI_FORMAT.R8_SINT:
-                    ddsHeader.PixelFormat.dwFlags = DDS.DDS_RGB;
-                    ddsHeader.PixelFormat.dwRGBBitCount = 8;
-                    ddsHeader.PixelFormat.dwRBitMask = 0xFF;
-                    ddsHeader.dwPitchOrLinearSize = (uint)(width * height); // 8bpp
-                    break;
-                
-                case DXGI_FORMAT.R16G16B16A16_FLOAT:
-                    ddsHeader.PixelFormat.dwFlags = DDS.DDS_FOURCC;
-                    ddsHeader.PixelFormat.dwFourCC = 0x71;//DDS.MAKEFOURCC('D', 'X', '1', '0');
-                    ddsHeader.dwPitchOrLinearSize = (uint)(width * height * 8); // 64bpp
-                    break;
-                case DXGI_FORMAT.R16G16B16A16_UNORM:
-                    ddsHeader.PixelFormat.dwFlags = DDS.DDS_FOURCC;
-                    ddsHeader.PixelFormat.dwFourCC = 0x24;//DDS.MAKEFOURCC('D', 'X', '1', '0');
-                    ddsHeader.dwPitchOrLinearSize = (uint)(width * height * 8); // 64bpp
-                    break;
-                default:
-                    throw new UnsupportedDDSException("Unsupported DDS header format. File: " + this.FullPath);
-            }
-
-            // If tileMode is NOT TILE_MODE_DEFAULT assume Xbox format
-            if (tileMode != TILE_MODE_DEFAULT)
-            {
-                switch (dxgiFormat)
-                {
-                    case DXGI_FORMAT.BC1_UNORM:
-                    case DXGI_FORMAT.BC1_UNORM_SRGB:
-                    case DXGI_FORMAT.BC2_UNORM:
-                    case DXGI_FORMAT.BC3_UNORM:
-                    case DXGI_FORMAT.BC3_UNORM_SRGB:
-                    case DXGI_FORMAT.BC4_UNORM:
-                    case DXGI_FORMAT.BC5_SNORM:
-                    case DXGI_FORMAT.BC5_UNORM:
-                    case DXGI_FORMAT.BC7_UNORM:
-                    case DXGI_FORMAT.BC7_UNORM_SRGB:
-                        ddsHeader.PixelFormat.dwFourCC = DDS.MAKEFOURCC('X', 'B', 'O', 'X');
-                        break;
-                }
-            }
-
-            bw.Write((uint)DDS.DDS_MAGIC);
-            ddsHeader.Write(bw);
-
-            switch (dxgiFormat)
-            {
-                case DXGI_FORMAT.BC1_UNORM_SRGB:
-                case DXGI_FORMAT.BC3_UNORM_SRGB:
-                case DXGI_FORMAT.BC4_UNORM:
-                case DXGI_FORMAT.BC5_SNORM:
-                case DXGI_FORMAT.BC7_UNORM:
-                case DXGI_FORMAT.BC7_UNORM_SRGB:
-                case DXGI_FORMAT.R8G8B8A8_UNORM:
-                case DXGI_FORMAT.R8G8B8A8_SNORM:
-                case DXGI_FORMAT.R8G8B8A8_UNORM_SRGB:
-                case DXGI_FORMAT.B8G8R8A8_UNORM_SRGB:
-                case DXGI_FORMAT.R16G16B16A16_FLOAT:
-                case DXGI_FORMAT.R16G16B16A16_UNORM:
-                    new DDS_HEADER_DXT10
-                    {
-                        dxgiFormat = format,
-                        resourceDimension = (uint)DXT10_RESOURCE_DIMENSION.DIMENSION_TEXTURE2D,
-                        miscFlag = isCubemap == 1 ? DDS.DDS_RESOURCE_MISC_TEXTURECUBE : 0u,
-                        arraySize = isCubemap == 1 ? 6u : 1u,
-                        miscFlags2 = DDS.DDS_ALPHA_MODE_UNKNOWN
-                    }.Write(bw);
-                    break;
-                default:
-                    if (tileMode != TILE_MODE_DEFAULT)
-                    {
-                        new DDS_HEADER_DXT10()
-                        {
-                            dxgiFormat = format,
-                            resourceDimension = (uint)DXT10_RESOURCE_DIMENSION.DIMENSION_TEXTURE2D,
-                            miscFlag = isCubemap == 1 ? DDS.DDS_RESOURCE_MISC_TEXTURECUBE : 0u,
-                            arraySize = 1,
-                            miscFlags2 = DDS.DDS_ALPHA_MODE_UNKNOWN
-                        }.Write(bw);
-                    }
-                    break;
-            }
-
-            // If tileMode is NOT TILE_MODE_DEFAULT assume Xbox format
-            if (tileMode != TILE_MODE_DEFAULT)
-            {
-                bw.Write((uint)tileMode);
-                bw.Write(XBOX_BASE_ALIGNMENT);
-                dataSizePosition = bw.BaseStream.Position;
-                bw.Write((uint)0);
-                bw.Write(XBOX_XDK_VERSION);
-            }
+            bw.Write(headerBytes);
         }
 
         protected override void WriteDataToStream(Stream stream, SharedExtractParams extractParams, bool decompress = true)
