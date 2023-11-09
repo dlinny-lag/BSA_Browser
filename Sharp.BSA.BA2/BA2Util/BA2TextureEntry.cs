@@ -145,8 +145,6 @@ namespace SharpBSABA2.BA2Util
 
         protected override void WriteDataToStream(Stream stream, SharedExtractParams extractParams, bool decompress = true)
         {
-            File.AppendAllText("log.txt", $"{FullPath}\r\n{GetToolTipText()}\r\n\r\n");
-            
             var bw = new BinaryWriter(stream);
             var reader = extractParams.Reader;
 
