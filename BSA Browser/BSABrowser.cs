@@ -22,6 +22,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DirectXTex;
 
 namespace BSA_Browser
 {
@@ -610,7 +611,7 @@ namespace BSA_Browser
 
 #if DEBUG
             if (file is BA2TextureEntry ba2Tex)
-                lvi.SubItems.Add(Enum.GetName(typeof(DXGI_FORMAT), ba2Tex.format));
+                lvi.SubItems.Add(Enum.GetName(typeof(DirectXTexUtility.DXGIFormat), ba2Tex.format));
             else
                 lvi.SubItems.Add(string.Empty);
 #endif

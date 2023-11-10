@@ -8,6 +8,7 @@ using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DirectXTex;
 
 namespace BSA_Browser.Tools
 {
@@ -257,7 +258,7 @@ namespace BSA_Browser.Tools
                         compareProperties.Add(new CompareProperty("DXIGI_FORMAT",
                             aTex.format,
                             texCompare.format,
-                            typeof(DXGI_FORMAT_FULL),
+                            typeof(DirectXTexUtility.DXGIFormat),
                             "Texture"));
 
                         compareProperties.Add(new CompareProperty("Format",
@@ -296,7 +297,7 @@ namespace BSA_Browser.Tools
                         compareProperties.Add(new CompareProperty("DXGI_FORMAT",
                             gnfTex.format,
                             gnfCompare.format,
-                            typeof(DXGI_FORMAT_FULL),
+                            typeof(DirectXTexUtility.DXGIFormat),
                             "Texture"));
 
                         compareProperties.Add(new CompareProperty("Format",

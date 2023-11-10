@@ -3,6 +3,7 @@ using SharpBSABA2;
 using SharpBSABA2.BA2Util;
 using System;
 using System.Collections.Generic;
+using DirectXTex;
 
 namespace BSA_Browser.Sorting
 {
@@ -48,8 +49,8 @@ namespace BSA_Browser.Sorting
                 case ArchiveFileSortOrder.Extra:
                     if (a is BA2TextureEntry && b is BA2TextureEntry)
                     {
-                        string af = Enum.GetName(typeof(DXGI_FORMAT), (a as BA2TextureEntry).format);
-                        string bf = Enum.GetName(typeof(DXGI_FORMAT), (b as BA2TextureEntry).format);
+                        string af = Enum.GetName(typeof(DirectXTexUtility.DXGIFormat), (a as BA2TextureEntry).format);
+                        string bf = Enum.GetName(typeof(DirectXTexUtility.DXGIFormat), (b as BA2TextureEntry).format);
                         return SortingConfig.Descending ? string.CompareOrdinal(af, bf) :
                                       string.CompareOrdinal(bf, af);
                     }
