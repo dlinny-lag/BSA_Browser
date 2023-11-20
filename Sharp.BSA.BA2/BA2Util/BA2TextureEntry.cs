@@ -61,6 +61,8 @@ namespace SharpBSABA2.BA2Util
         public override uint RealSize => this.GetHeaderSize() + (uint)this.Chunks.Sum(x => Math.Max(x.fullSz, x.packSz));
         public override uint DisplaySize => this.GetHeaderSize() + (uint)this.Chunks.Sum(x => x.fullSz);
         public override ulong Offset => this.Chunks[0].offset;
+        
+        public DirectXTexUtility.DDSFlags DDSFlags { get; set; }
 
         public override ulong GetSizeInArchive(SharedExtractParams extractParams) => (ulong)Chunks.Sum(x => Compressed ? x.packSz : x.fullSz);
 
@@ -115,6 +117,7 @@ namespace SharpBSABA2.BA2Util
         }
 
         private uint _headerSize = 0;
+        private DirectXTexUtility.TexMetadata? _metadata = default;
         
         private uint GetHeaderSize()
         {
@@ -130,14 +133,16 @@ namespace SharpBSABA2.BA2Util
             var hasDx10Header = DirectXTexUtility.HasDx10Header(pixelFormat);
             if (hasDx10Header)
                 size += (uint) Marshal.SizeOf<DirectXTexUtility.DX10Header>();
+
+            _metadata = metadata;
             
             return _headerSize = size;
         }
 
         private void WriteHeader(BinaryWriter bw)
         {
-            var metadata = DirectXTexUtility.GenerateMetadata(width, height, numMips, (DirectXTexUtility.DXGIFormat) format, isCubemap == 1);
-            DirectXTexUtility.GenerateDDSHeader(metadata, DirectXTexUtility.DDSFlags.FORCEDX10EXTMISC2, out var header, out var header10);
+            var metadata = _metadata ?? DirectXTexUtility.GenerateMetadata(width, height, numMips, (DirectXTexUtility.DXGIFormat) format, isCubemap == 1);
+            DirectXTexUtility.GenerateDDSHeader(metadata, DDSFlags, out var header, out var header10);
             var headerBytes = DirectXTexUtility.EncodeDDSHeader(header, header10);
 
             bw.Write(headerBytes);
@@ -151,11 +156,8 @@ namespace SharpBSABA2.BA2Util
             // Reset at start since value might still be in used for a bit after
             this.BytesWritten = 0;
 
-            if (decompress && GenerateTextureHeader)
-            {
+            if (decompress && GenerateTextureHeader) 
                 this.WriteHeader(bw);
-                bw.Flush();
-            }
 
             for (int i = 0; i < numChunks; i++)
             {

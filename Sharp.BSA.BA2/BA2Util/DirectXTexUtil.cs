@@ -164,6 +164,7 @@ namespace DirectXTex
         /// <summary>
         /// DDS Flags
         /// </summary>
+        [Flags]
         public enum DDSFlags
         {
             NONE = 0x0,
@@ -359,6 +360,7 @@ namespace DirectXTex
             /// <summary>
             /// DDS Header Flags
             /// </summary>
+            [Flags]
             public enum HeaderFlags : uint
             {
                 TEXTURE = 0x00001007,  // DDSDCAPS | DDSDHEIGHT | DDSDWIDTH | DDSDPIXELFORMAT 
@@ -899,6 +901,8 @@ namespace DirectXTex
                 );
         }
 
+        private static readonly uint[] _elevenUInts = Enumerable.Repeat((uint)0, 11).ToArray();
+        
         /// <summary>
         /// Generates a DDS Header, and if requires, a DX10 Header
         /// </summary>
@@ -918,17 +922,38 @@ namespace DirectXTex
             // Check for DX10 Ext
             if (flags.HasFlag(DDSFlags.FORCEDX10EXTMISC2))
                 flags |= DDSFlags.FORCEDX10EXT;
+            
             // Create DDS Header
             header = new DDSHeader
             {
                 // Set Data
-                Size = (uint)Marshal.SizeOf<DDSHeader>(),
+                Size = (uint) Marshal.SizeOf<DDSHeader>(),
                 Flags = DDSHeader.HeaderFlags.TEXTURE,
-                Caps = (uint)DDSHeader.SurfaceFlags.TEXTURE,
-                PixelFormat = new DDSHeader.DDSPixelFormat()
+                Height = 0,
+                Width = 0,
+                PitchOrLinearSize = 0,
+                Depth = 0,
+                MipMapCount = 0,
+                Reserved1 = _elevenUInts,
+                Caps = (uint) DDSHeader.SurfaceFlags.TEXTURE,
+                Caps2 = 0,
+                Caps3 = 0,
+                Caps4 = 0,
+                Reserved2 = 0,
+                PixelFormat = new DDSHeader.DDSPixelFormat(),
+
             };
+            
             // Create DX10 Header
-            dx10Header = new DX10Header();
+            dx10Header = new DX10Header
+            {
+                Format = 0,
+                ResourceDimension = (TexDimension) 0,
+                MiscFlag = (TexMiscFlags) 0,
+                ArraySize = 0,
+                MiscFlags2 = 0,
+            };
+            
             // Switch format
             header.PixelFormat = GetPixelFormat(metaData);
             // Check for mips
