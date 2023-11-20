@@ -14,7 +14,7 @@
     <RepositoryUrl>https://github.com/p1x/BSA_Browser.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>ba2 bsa</PackageTags>
-    <Version>1.18.3-beta</Version>
+    <Version>1.18.4-beta</Version>
     <Description>Library for BSA and BA2 archives.</Description>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
