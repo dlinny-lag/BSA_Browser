@@ -6,6 +6,7 @@ using BSA_Browser.Extensions;
 using BSA_Browser.Properties;
 using BSA_Browser.Sorting;
 using BSA_Browser.Tools;
+using DirectXTex;
 using SharpBSABA2;
 using SharpBSABA2.BA2Util;
 using SharpBSABA2.BSAUtil;
@@ -24,7 +25,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DirectXTex;
+using static DirectXTex.DirectXTexUtility;
 
 namespace BSA_Browser
 {
@@ -468,7 +469,7 @@ namespace BSA_Browser
             {
                 try
                 {
-                    var ddsFormat = Enum.Parse(typeof(DXGI_FORMAT), fe.format.ToString());
+                    var ddsFormat = Enum.Parse(typeof(DXGIFormat), fe.format.ToString());
                     sb.AppendLine(ddsFormat.ToString());
                 }
                 catch { }
