@@ -25,11 +25,8 @@
 // Source: https://gist.github.com/Scobalula/d9474f3fcf3d5a2ca596fceb64e16c98
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
 
 namespace DirectXTex
