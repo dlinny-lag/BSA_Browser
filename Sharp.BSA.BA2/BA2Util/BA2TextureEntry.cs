@@ -73,7 +73,7 @@ namespace SharpBSABA2.BA2Util
             dirHash = ba2.BinaryReader.ReadUInt32();
 
             if (ba2 is BA2 b) 
-                IsLz4 = b.Header.CompressionFlag == 3;
+                IsLz4 = b.Header.CompressionFormat == CompressionFormat.LZ4;
 
             FullPath = dirHash > 0 ? $"{dirHash:X}_" : string.Empty;
             FullPath += $"{nameHash:X}.{Extension.TrimEnd('\0')}";
@@ -402,8 +402,8 @@ namespace SharpBSABA2.BA2Util
                         CompressionUtils.DecompressLZ4(
                             reader.BaseStream,
                             this.Chunks[i].packSz,
-                            stream,
                             Chunks[i].fullSz,
+                            stream,
                             bytesWritten => this.BytesWritten = prev + bytesWritten
                         );
                     else
